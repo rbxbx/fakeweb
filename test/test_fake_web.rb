@@ -7,6 +7,15 @@ class TestFakeWeb < Test::Unit::TestCase
     assert FakeWeb.registered_uri?(:get, 'http://mock/test_example.txt')
   end
 
+  def test_register_uri_with_a_block
+    FakeWeb.register_uri(:get) do |fake|
+      fake.uri 'http://mock/test_example.txt'
+      fake.body 'example'
+      fake.status ['200', 'OK']
+    end
+    assert FakeWeb.registered_uri?(:get, 'http://mock/test_example.txt')
+  end
+
   def test_register_uri_with_wrong_number_of_arguments
     assert_raises ArgumentError do
       FakeWeb.register_uri("http://example.com")

@@ -1,6 +1,7 @@
 require 'singleton'
 
 require 'fake_web/ext/net_http'
+require 'fake_web/fake'
 require 'fake_web/registry'
 require 'fake_web/response'
 require 'fake_web/responder'
@@ -11,7 +12,6 @@ FakeWeb::Utility.record_loaded_net_http_replacement_libs
 FakeWeb::Utility.puts_warning_for_net_http_around_advice_libs_if_needed
 
 module FakeWeb
-
   # Returns the version string for the copy of FakeWeb you have loaded.
   VERSION = '1.2.8'
 
@@ -120,9 +120,14 @@ module FakeWeb
   # options to specify the HTTP headers to be used in the response. Example:
   #
   #   FakeWeb.register_uri(:get, "http://example.com/index.txt", :body => "Hello", :content_type => "text/plain")
+
+
   def self.register_uri(*args)
-    case args.length
-    when 3
+    if block_given?
+      yield fake(*args.first)
+      args = [ fake.method, fake.uri, fake.options ].compact
+    end
+    case args.length when 3
       Registry.instance.register_uri(*args)
     when 2
       print_missing_http_method_deprecation_warning(*args)
@@ -166,6 +171,10 @@ module FakeWeb
   end
 
   private
+
+  def self.fake(method=nil)
+    @fake ||= Fake.new(method)
+  end
 
   def self.print_missing_http_method_deprecation_warning(*args)
     method = caller.first.match(/`(.*?)'/)[1]

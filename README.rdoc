@@ -66,6 +66,18 @@ more than one URI.
     response.body     # => "Nothing to be found 'round here"
   end
 
+=== Alternate block syntax for registering a response
+
+  FakeWeb.register_uri(:get) do |fake|
+    fake.uri 'http://example.com/test4'
+    fake.body 'example'
+    fake.status ['200', 'OK']
+  end
+
+  This is functionally equivalent to
+
+  FakeWeb.register_uri(:get, "http://example.com", :body => 'example', :status => ['200', 'OK'])
+
 === Responding to any HTTP method
 
   FakeWeb.register_uri(:any, "http://example.com", :body => "response for any HTTP method")
